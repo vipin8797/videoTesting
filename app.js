@@ -42,13 +42,14 @@ app.get("/",(req,res)=>{
 
 //Apppp
 const PORT = process.env.PORT;
-connectDb()
-.then(()=>{ 
+// connectDb()
+// .then(()=>{ 
+
+// })
+// .catch((err)=>{
+//     console.log("APP Crash");
+//     console.log(err);
+// })
 server.listen( PORT,()=>{
     console.log(`listening at ${PORT}`);
-})
-})
-.catch((err)=>{
-    console.log("APP Crash");
-    console.log(err);
 })
