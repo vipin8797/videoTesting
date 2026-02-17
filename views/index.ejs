@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+      
+         <main class="main-container">
+<div class="status">
+  <div>connectionState:
+    <span id="connection-state-badge" class="badge bg-secondary">status</span>
+  </div>
+
+  <div>iceConnectionState:
+    <span id="ice-connection-state-badge" class="badge bg-secondary">status</span>
+  </div>
+
+  <div>signalingState:
+    <span id="signaling-state-badge" class="badge bg-secondary">status</span>
+  </div>
+
+   <div>iceGatheringState:
+    <span id="iceGathering-state-badge" class="badge bg-secondary">status</span>
+  </div>
+</div>
+
+
+
+            
+        <aside class="caller-list-wrapper">
+            
+            <h1 class="caller-list-heading h-font">Contacts</h1>
+            <ul id="allusers" class="caller-list">
+                </ul>
+        </aside>
+ 
+        <section class="video-call-container">
+            <div class="username-input">
+                <input id="username" type="text" placeholder="Enter Username">
+                <button id="create-user" type="button" class="btn btn-success">Create</button>
+            </div>
+
+            <div class="video-streams">
+                <div class="video-card local-video">
+                    <video id="localVideo" autoplay playsinline ></video>
+                    
+                    <div class="controls">
+                        <button id="btn-toggle-audio" class="control-btn" title="Mute Mic">
+                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        </button>
+                        <button id="btn-toggle-video" class="control-btn" title="Stop Camera">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="video-card remote-video">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="controls">
+                        <button id="btn-toggle-remote-audio" class="control-btn" title="Mute Remote Audio">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; justify-content: center;">
+                <button id="end-call-btn" class="call call-disconnect d-none">
+                   <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path></svg>
+                </button>
+                <button id="toggle-audio" style="padding: 1rem; cursor:pointer;">Mute/Unmute Global</button>
+            </div>
+        </section>
+    </main>
+  
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+//   const socket = io();
+
+</script>
+<script src="socketLogic.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
