@@ -134,14 +134,24 @@ function updateConnectionStatus() {
 //Remote clinet side code
 socket.on("icecandidate", async({from,candidate})=>{
     if(peerConnectionObj){
+        if(!peerConnectionObj.remoteDescription){
+            console.log("rolling back");
+            return;
+        }
         await peerConnectionObj.addIceCandidate(new RTCIceCandidate(candidate));
         console.log("ice candidate accepted");
     }
 })
  
-socket.on("offer", async({from, offer})=>{
-    console.log("recived offer from",from);
-    toUser = from;
+//function to show popup for call
+async function showCallPopup(from, offer) {
+
+  const accept = confirm(`${from} is calling you. Accept?`);
+
+  if (accept) {
+        console.log("call accepted");
+   
+         toUser = from;
     if(!peerConnectionObj){
         return;
     }
@@ -153,6 +163,7 @@ socket.on("offer", async({from, offer})=>{
       //setting offer to remote description
       await peerConnectionObj.setRemoteDescription(offer);
       //creating answer
+
      const answer = await peerConnectionObj.createAnswer();
      //setting answer in localDescription
      await peerConnectionObj.setLocalDescription(answer);
@@ -163,6 +174,30 @@ socket.on("offer", async({from, offer})=>{
     }catch(err){
         console.log(err);
     }
+   
+
+
+
+  } else {
+
+
+    socket.emit("call-rejected", { to: from });
+    console.log("call rejected");
+  }
+}
+
+
+socket.on("offer", async({from, offer})=>{
+
+ //1.check if already on any call
+   if(peerConnectionObj && peerConnectionObj.connectionState === "connected"){
+       socket.emit("busy", { to: from });
+       return;
+   }
+
+
+//2. accept or reject calll.
+   showCallPopup(from,offer);
 });
 
 
@@ -252,13 +287,30 @@ socket.on("joined",(allUsers)=>{
     createUserHtml();
 })
 
+
+socket.on("busy",async({msg})=>{
+    console.log(msg);
+    peerConnectionObj.close();
+    peerConnectionObj = PeerConnection.destroy();
+    peerConnectionObj = PeerConnection.resetConnection();
+    
+})
+
 socket.on("answer",async(answer)=>{
     try{
      await peerConnectionObj.setRemoteDescription(answer);
      console.log("got answer");
+     callMonitor(peerConnectionObj);
     }catch(err){
         console.log(err);
     }
+})
+
+
+socket.on("call-rejected", async({from})=>{
+    console.log("call rejected");
+      peerConnectionObj.resetConnection();
+
 })
 
 });
@@ -271,9 +323,11 @@ const startCall =  async(user)=>{
         console.log("peer object not found");
         return;
     }
-    if(peerConnectionObj.signalingState !== "stable"){
-        console.log("connection is not stable ,cannot creat ooffer");
-        return;
+    if(peerConnectionObj.signalingState !== "stable"|| peerConnectionObj.iceConnectionState !== "new" ||
+        peerConnectionObj.connectionState !== "new" || peerConnectionObj.iceGatheringState !== "new"){
+        console.log("configuring peer again");
+        peerConnectionObj = PeerConnection.getInstance();
+        
     }
     console.log("calling to ,",user);
     try{
@@ -312,3 +366,53 @@ window.addEventListener("beforeunload",()=>{
 })
 
 
+//call monitoring function
+function callMonitor(pcObject){
+
+    if (!pcObject) return;
+
+    const handler = () => {
+
+        const state = pcObject.connectionState;
+        console.log("connectionState:", state);
+
+        if(state === "connecting"){
+            console.log("call connecting");
+        }
+
+        if(state === "connected"){
+            console.log("call connected");
+        }
+
+        if(state === "disconnected"){
+            console.log("Temporary network issue");
+
+            const currentPc = pcObject;
+
+            setTimeout(() => {
+                if (
+                    currentPc.connectionState === "disconnected"
+                ) {
+                    console.log("ending call");
+                    // endCallCleanup();
+                    console.log("call ending");
+                }
+            }, 5000);
+        }
+
+        if(state === "failed"){
+            console.log("call failed");
+            // endCallCleanup();
+            console.log("call ending");
+        }
+
+        if(state === "closed"){
+            console.log("call closed");
+        }
+
+    };
+    
+//adding event listners to connectionState
+    pcObject.addEventListener("connectionstatechange", handler);
+
+}

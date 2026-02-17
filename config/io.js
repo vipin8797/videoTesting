@@ -21,6 +21,21 @@ const getSocket  = (socket)=>{
       console.log(allUsers[to]);
       Socket.to(allUsers[to].id).emit("offer",({from:from, offer:offer}));
    });
+   
+   Socket.on("busy", ({ to }) => {
+
+  if (!allUsers[to]) return;
+
+  Socket.to(allUsers[to].id).emit("busy", {
+    msg: "User is busy on another call"
+  });
+
+});
+
+
+   Socket.on("call-rejected",({to})=>{
+       Socket.to(allUsers[to].id).emit("call-rejected",({from:to}));
+   })
 
   Socket.on("icecandidate", ({to, from, candidate}) => {
     console.log("transfering canidate");
