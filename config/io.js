@@ -53,7 +53,9 @@ const getSocket  = (socket)=>{
    })
 
 
-
+  Socket.on("end-call",({from , to})=>{
+    Socket.to(allUsers[to.id]).emit('end-call',({from:from, to:to}));
+  })
 
 
  });

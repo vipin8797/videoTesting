@@ -18,6 +18,7 @@ const remoteVideo = document.getElementById("remoteVideo");
 let peerConnectionObj;
 let localStream;
 let toUser;
+const callEndBtn = document.getElementById("call-end");
 
 //Function to create peerConnection
 const PeerConnection = (function(){
@@ -43,6 +44,7 @@ const createPeerConnection = () => {
 
   // Add local tracks
   if (localStream) {
+    
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
@@ -201,17 +203,26 @@ socket.on("offer", async({from, offer})=>{
 });
 
 
+socket.on("end-call",({from, to})=>{
+    endCall();
+});
+
+
 
 // Initializing video/audio
 const startMyVideo = async()=>{
     try{
-       const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+       const stream = await navigator.mediaDevices.getUserMedia({video:true,
+        audio:{
+            echoCancellation:true,
+            noiseSuppression:true,
+            autoGainControl:true,
+        }});
        localStream = stream;
        console.log("Streams: ",stream);
        console.log("id: ",stream.id);
        console.log("isActive: ",stream.active);
        console.log("Tracks: ",stream.getTracks());
-
        localVideo.srcObject  = stream;
     }catch(err){
         console.log(err);
@@ -313,6 +324,11 @@ socket.on("call-rejected", async({from})=>{
 
 })
 
+
+socket.on("end-call",({from, to})=>{
+     endCall();
+})
+
 });
 
 
@@ -394,16 +410,16 @@ function callMonitor(pcObject){
                     currentPc.connectionState === "disconnected"
                 ) {
                     console.log("ending call");
-                    // endCallCleanup();
                     console.log("call ending");
+                    endCall
                 }
             }, 5000);
         }
 
         if(state === "failed"){
             console.log("call failed");
-            // endCallCleanup();
             console.log("call ending");
+            endCall
         }
 
         if(state === "closed"){
@@ -415,4 +431,30 @@ function callMonitor(pcObject){
 //adding event listners to connectionState
     pcObject.addEventListener("connectionstatechange", handler);
 
+}
+
+
+//call end event
+callEndBtn.addEventListener("click",()=>{
+    //emming end call
+      socket.emit("end-call",({from:username.value, to:toUser}));
+    //end call function
+    endCall();
+})
+
+
+//end call function
+function endCall(){
+    if(peerConnectionObj){
+    peerConnectionObj.close();
+    peerConnectionObj = PeerConnection.destroy();
+    peerConnectionObj = PeerConnection.resetConnection();
+    }
+
+
+    //removing remote stream
+    if(remoteVideo){
+        remoteVideo.srcObject = null;
+    }
+    console.log("call ended..");
 }
